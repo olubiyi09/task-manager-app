@@ -1,0 +1,54 @@
+body {
+  background-color: var(--color-primary);
+  overflow: hidden;
+}
+
+form.form input {
+  width: 75%;
+}
+
+form button {
+  width: 100%;
+}
+
+.save-btn {
+  margin: 1rem 3rem 0 8rem;
+}
+
+.task {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background-color: var(--color-grey);
+  padding: 1rem;
+  margin: 1rem;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+}
+
+button {
+  background-color: transparent;
+  border: none;
+  margin-left: 5px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.complete {
+  position: relative;
+  background-color: #fff;
+  border-left: 5px solid orangered;
+}
+
+.complete::after {
+  content: "Complete";
+  position: absolute;
+  right: 1rem;
+  bottom: 5px;
+  padding: 2px;
+  background-color: orangered;
+  color: #fff;
+  border-radius: 3px;
+}
