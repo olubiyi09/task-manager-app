@@ -22,6 +22,17 @@ const taskReducer = (state, action) => {
     };
   }
 
+  if (action.type === "ADD_TASK") {
+    const allTask = [...state.tasks, action.payload];
+    return {
+      ...state,
+      tasks: allTask,
+      isAlertOpen: true,
+      alertContent: "Task added successfully",
+      alertClass: "success",
+    };
+  }
+
   return state;
 };
 
@@ -60,6 +71,22 @@ const TaskManagerReducer = () => {
       dispatch({
         type: "EMPTY_FIELD",
       });
+    }
+    if (name && date) {
+      const newTask = {
+        id: Date.now(),
+        name,
+        date,
+        complete: false,
+      };
+
+      dispatch({
+        type: "ADD_TASK",
+        payload: newTask,
+      });
+      setName("");
+      setDate("");
+      setTasks([...tasks, newTask]);
     }
   };
 
@@ -121,11 +148,11 @@ const TaskManagerReducer = () => {
         <div className="--width-500px --p">
           <h2 className="--text-light">Task List</h2>
           <hr style={{ background: "#fff" }} />
-          {tasks.length === 0 ? (
+          {state.tasks.length === 0 ? (
             <p className="--text-light --my">No task added...</p>
           ) : (
             <div>
-              {tasks.map((task) => {
+              {state.tasks.map((task) => {
                 return (
                   <Task
                     {...task}
