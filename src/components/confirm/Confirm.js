@@ -1,22 +1,35 @@
 import React from "react";
 import "./Confirm.css";
 
-const Confirm = () => {
+const Confirm = ({
+  modalTitle,
+  modalMsg,
+  modalAction,
+  modalActionText,
+  onCloseModal,
+}) => {
   return (
     <div className="confirm">
       <div className="confirm-modal">
         <div className="header">
-          <div className="title">Delete Task</div>
-          <button className="close"> &times; </button>
+          <div className="title">{modalTitle}</div>
+          <button className="close" onClick={onCloseModal}>
+            {" "}
+            &times;{" "}
+          </button>
         </div>
 
         <div className="content">
-          <p>You are about to delete this task</p>
+          <p>{modalMsg}</p>
         </div>
 
         <div className="buttons">
-          <button className="btn btn-ok">Ok</button>
-          <button className="btn btn-cancel">Cancel</button>
+          <button className="btn btn-ok" onClick={modalAction}>
+            {modalActionText}
+          </button>
+          <button className="btn btn-cancel" onClick={onCloseModal}>
+            Cancel
+          </button>
         </div>
       </div>
     </div>

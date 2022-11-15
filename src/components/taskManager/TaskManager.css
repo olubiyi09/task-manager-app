@@ -1,6 +1,6 @@
 body {
   background-color: var(--color-primary);
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 form.form input {

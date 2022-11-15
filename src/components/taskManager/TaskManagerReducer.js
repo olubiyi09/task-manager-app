@@ -33,6 +33,48 @@ const taskReducer = (state, action) => {
     };
   }
 
+  if (action.type === "OPEN_EDIT_MODAL") {
+    console.log(action.payload);
+    return {
+      ...state,
+      tasksID: action.payload,
+      isEditModalOpen: true,
+      modalTitle: "Edit Task",
+      modalMessage: "You are about to edit this task",
+      modalActionText: "Edit",
+    };
+  }
+
+  if (action.type === "CLOSE_MODAL") {
+    return { ...state, isEditModalOpen: false };
+  }
+
+  if (action.type === "EDIT_TASK") {
+    return { ...state, isEditing: true };
+  }
+
+  if (action.type === "UPDATE_TASK") {
+    const updatedTask = action.payload;
+    const id = action.payload.id;
+
+    // Find the task index
+    const taskIndex = state.tasks.findIndex((task) => {
+      return task.id === id;
+    });
+    // Replace the task by its index
+    if (taskIndex !== -1) {
+      state.tasks[taskIndex] = updatedTask;
+    }
+
+    return {
+      ...state,
+      isEditing: false,
+      isAlertOpen: true,
+      alertContent: "Task edited successfully",
+      alertClass: "success",
+    };
+  }
+
   return state;
 };
 
@@ -49,6 +91,11 @@ const TaskManagerReducer = () => {
     isAlertOpen: false,
     alertContent: "This is an alert",
     alertClass: "success",
+    isEditModalOpen: false,
+    isDeletModalOpen: false,
+    modalTitle: "Delete Task",
+    modalMessage: "You are about to delete this task.",
+    modalActionText: "OK",
   };
 
   const [state, dispatch] = useReducer(taskReducer, initialState);
@@ -72,6 +119,33 @@ const TaskManagerReducer = () => {
         type: "EMPTY_FIELD",
       });
     }
+
+    if (name && date && state.isEditing) {
+      const updatedTask = {
+        id: state.tasksID,
+        name,
+        date,
+        complete: false,
+      };
+      dispatch({
+        type: "UPDATE_TASK",
+        payload: updatedTask,
+      });
+
+      setName("");
+      setDate("");
+      setTasks(
+        tasks.map((task) => {
+          if (task.id === updatedTask.id) {
+            return { ...task, name, date, complete: false };
+          }
+          return task;
+        })
+      );
+
+      return;
+    }
+
     if (name && date) {
       const newTask = {
         id: Date.now(),
@@ -90,11 +164,35 @@ const TaskManagerReducer = () => {
     }
   };
 
-  const editTask = (id) => {};
+  const openEditModal = (id) => {
+    dispatch({
+      type: "OPEN_EDIT_MODAL",
+      payload: id,
+    });
+  };
+
+  const editTask = () => {
+    const id = state.tasksID;
+    dispatch({
+      type: "EDIT_TASK",
+      payload: id,
+    });
+
+    const thisTask = state.tasks.find((task) => task.id === id);
+    setName(thisTask.name);
+    setDate(thisTask.date);
+    closeModal();
+  };
 
   const deleteTask = (id) => {};
 
   const completeTask = (id) => {};
+
+  const closeModal = () => {
+    dispatch({
+      type: "CLOSE_MODAL",
+    });
+  };
 
   return (
     <div className="--bg-primary">
@@ -105,7 +203,16 @@ const TaskManagerReducer = () => {
           onCloseAlert={closeAlert}
         />
       )}
-      {/* <Confirm /> */}
+      {state.isEditModalOpen && (
+        <Confirm
+          modalTitle={state.modalTitle}
+          modalMsg={state.modalMessage}
+          modalActionText={state.modalActionText}
+          modalAction={editTask}
+          onCloseModal={closeModal}
+        />
+      )}
+
       <h1 className="--text-center --text-light">Task Manager Reducer</h1>
       <div className="--flex-center --p">
         <div className="--card --bg-light --width-500px --p">
@@ -135,8 +242,7 @@ const TaskManagerReducer = () => {
 
             <div className="save-btn">
               <button className="--btn --btn-success ">
-                {/* {isEditing ? "Edit Task" : "Save Task"} */}
-                Save Task
+                {state.isEditing ? "Edit Task" : "Save Task"}
               </button>
             </div>
           </form>
@@ -156,7 +262,7 @@ const TaskManagerReducer = () => {
                 return (
                   <Task
                     {...task}
-                    editTask={editTask}
+                    editTask={openEditModal}
                     deleteTask={deleteTask}
                     completeTask={completeTask}
                   />
