@@ -51,4 +51,15 @@ button {
   background-color: orangered;
   color: #fff;
   border-radius: 3px;
+  animation: slide-left 0.3s ease;
+}
+
+@keyframes slide-left {
+  0% {
+    transform: translateX(40%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
 }

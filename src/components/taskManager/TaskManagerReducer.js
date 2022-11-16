@@ -46,7 +46,7 @@ const taskReducer = (state, action) => {
   }
 
   if (action.type === "CLOSE_MODAL") {
-    return { ...state, isEditModalOpen: false };
+    return { ...state, isEditModalOpen: false, isDeleteModalOpen: false };
   }
 
   if (action.type === "EDIT_TASK") {
@@ -75,6 +75,54 @@ const taskReducer = (state, action) => {
     };
   }
 
+  if (action.type === "OPEN_DELETE_MODAL") {
+    return {
+      ...state,
+      tasksID: action.payload,
+      isDeleteModalOpen: true,
+      modalTitle: "Delete task",
+      modalMessage: "You are about to delete this task",
+      modalActionText: "Delete",
+    };
+  }
+
+  if (action.type === "DELETE_TASK") {
+    const id = action.payload;
+    const newTasks = state.tasks.filter((task) => task.id !== id);
+    return {
+      ...state,
+      tasks: newTasks,
+      isAlertOpen: true,
+      alertContent: "Task deleted successfully",
+      alertClass: "success",
+    };
+  }
+
+  if (action.type === "COMPLETE_TASK") {
+    const id = action.payload;
+    // Find task index
+    const taskIndex = state.tasks.findIndex((task) => {
+      return task.id === id;
+    });
+    let updatedTask = {
+      id,
+      name: state.tasks[taskIndex].name,
+      date: state.tasks[taskIndex].date,
+      complete: true,
+    };
+
+    if (taskIndex !== -1) {
+      state.tasks[taskIndex] = updatedTask;
+    }
+
+    return {
+      ...state,
+      isAlertOpen: true,
+      alertContent: "Task Completed",
+      alertClass: "success",
+    };
+  }
+
   return state;
 };
 
@@ -92,7 +140,7 @@ const TaskManagerReducer = () => {
     alertContent: "This is an alert",
     alertClass: "success",
     isEditModalOpen: false,
-    isDeletModalOpen: false,
+    isDeleteModalOpen: false,
     modalTitle: "Delete Task",
     modalMessage: "You are about to delete this task.",
     modalActionText: "OK",
@@ -184,9 +232,40 @@ const TaskManagerReducer = () => {
     closeModal();
   };
 
-  const deleteTask = (id) => {};
+  const openDeleteModal = (id) => {
+    dispatch({
+      type: "OPEN_DELETE_MODAL",
+      payload: id,
+    });
+  };
 
-  const completeTask = (id) => {};
+  const deleteTask = () => {
+    const id = state.tasksID;
+    dispatch({
+      type: "DELETE_TASK",
+      payload: id,
+    });
+
+    const newTask = tasks.filter((task) => task.id !== id);
+    setTasks(newTask);
+    closeModal();
+  };
+
+  const completeTask = (id) => {
+    dispatch({
+      type: "COMPLETE_TASK",
+      payload: id,
+    });
+
+    setTasks(
+      tasks.map((task) => {
+        if (task.id === id) {
+          return { ...task, complete: true };
+        }
+        return task;
+      })
+    );
+  };
 
   const closeModal = () => {
     dispatch({
@@ -209,6 +288,16 @@ const TaskManagerReducer = () => {
           modalMsg={state.modalMessage}
           modalActionText={state.modalActionText}
           modalAction={editTask}
+          onCloseModal={closeModal}
+        />
+      )}
+
+      {state.isDeleteModalOpen && (
+        <Confirm
+          modalTitle={state.modalTitle}
+          modalMsg={state.modalMessage}
+          modalActionText={state.modalActionText}
+          modalAction={deleteTask}
           onCloseModal={closeModal}
         />
       )}
@@ -263,7 +352,7 @@ const TaskManagerReducer = () => {
                   <Task
                     {...task}
                     editTask={openEditModal}
-                    deleteTask={deleteTask}
+                    deleteTask={openDeleteModal}
                     completeTask={completeTask}
                   />
                 );
